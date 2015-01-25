@@ -13,6 +13,9 @@
     By: Chdata
 
 */
+
+#define MAX_CENTER_TEXT         192            //  PrintCenterText()
+
 static s_iLastPriority[TF_MAX_PLAYERS] = {-1,...};
 static s_iLastUserId[TF_MAX_PLAYERS] = {0,...};
 static Handle:s_hPCTStack[TF_MAX_PLAYERS] = {INVALID_HANDLE,...};
