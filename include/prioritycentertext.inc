@@ -20,16 +20,21 @@ static Handle:s_hPCTStack[TF_MAX_PLAYERS] = {INVALID_HANDLE,...};
 /*
     An example of how to use this:
 
-    PriorityCenterText(iClient, GetClientImmunityLevel(iClient), "My message's priority depends on my immunity level.");
+    PriorityCenterText(iClient, GetAdminImmunityLevel(GetUserAdmin(iAuthor), "My message's priority depends on my immunity level.");
 
     IF old priority == new priority THEN old message is overwritten by new message.
 
 */
 stock PriorityCenterText(iClient, iPriority = -1, const String:szFormat[], any:...)
 {
-    if (!IsValidClient(iClient))
+    if (iClient <= 0 || iClient > MaxClients)
     {
-        ThrowError("Client index %i is invalid or not in game.", iClient);
+        ThrowError("Invalid client index %i", iClient);
+    }
+    
+    if (!IsClientInGame(iClient))
+    {
+        ThrowError("Client %i is not in game", iClient);
     }
 
     PCTCheck();
