@@ -141,7 +141,7 @@ public Action:RevertPriorityCenterText(Handle:hTimer, any:Client)
     }
     else
     {
-        s_iLastPriority[iClient] = MIN_INT;
-        s_hPCTTimer[iClient] = INVALID_HANDLE;
+        s_iLastPriority[Client] = MIN_INT;
+        s_hPCTTimer[Client] = INVALID_HANDLE;
     }
 }
