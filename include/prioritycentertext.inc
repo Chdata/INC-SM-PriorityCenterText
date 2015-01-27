@@ -5,7 +5,7 @@
 
 
 /*
-    PriorityCenterText (Version 0x04)
+    PriorityCenterText (Version 0x05)
 
     Only one message can be shown in center text at a time.
     These stocks allow that space to be given different priority levels that prevent new messages from overwriting what's there.
@@ -49,7 +49,7 @@ stock PriorityCenterText(iClient, iPriority = MIN_INT, const String:szFormat[], 
     if (iPriority > s_iLastPriority[iClient])
     {
         ClearTimer(s_hPCTTimer[iClient]);
-        s_hPCTTimer[iClient] = CreateTimer(5.0, RevertPriorityCenterText, GetClientUserId(iClient), TIMER_FLAG_NO_MAPCHANGE);
+        s_hPCTTimer[iClient] = CreateTimer(5.0, RevertPriorityCenterText, iClient);
 
         s_iLastPriority[iClient] = iPriority;
     }
@@ -106,7 +106,7 @@ stock PriorityCenterTextAllEx(iPriority = MIN_INT+1, const String:szFormat[], an
     if (iPriority > s_iLastPriority[0])
     {
         ClearTimer(s_hPCTTimer[0]);
-        s_hPCTTimer[0] = CreateTimer(5.0, RevertPriorityCenterText, -1, TIMER_FLAG_NO_MAPCHANGE);
+        s_hPCTTimer[0] = CreateTimer(5.0, RevertPriorityCenterText, -1);
 
         s_iLastPriority[0] = iPriority;
 
@@ -129,9 +129,9 @@ stock PriorityCenterTextAllEx(iPriority = MIN_INT+1, const String:szFormat[], an
     }
 }
 
-public Action:RevertPriorityCenterText(Handle:hTimer, any:UserId)
+public Action:RevertPriorityCenterText(Handle:hTimer, any:Client)
 {
-    if (UserId == -1) // "All"
+    if (Client == -1) // "All"
     {
         for (new i = 0; i <= MaxClients; i++)
         {
@@ -141,11 +141,7 @@ public Action:RevertPriorityCenterText(Handle:hTimer, any:UserId)
     }
     else
     {
-        new iClient = GetClientOfUserId(UserId);
-        if (iClient && IsClientInGame(iClient))
-        {
-            s_iLastPriority[iClient] = MIN_INT;
-            s_hPCTTimer[iClient] = INVALID_HANDLE;
-        }
+        s_iLastPriority[iClient] = MIN_INT;
+        s_hPCTTimer[iClient] = INVALID_HANDLE;
     }
 }
