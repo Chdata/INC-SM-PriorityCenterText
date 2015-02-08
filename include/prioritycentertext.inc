@@ -5,7 +5,7 @@
 
 
 /*
-    PriorityCenterText (Version 0x05)
+    PriorityCenterText (Version 0x06)
 
     Only one message can be shown in center text at a time.
     These stocks allow that space to be given different priority levels that prevent new messages from overwriting what's there.
@@ -16,10 +16,11 @@
 
 #define MAX_CENTER_TEXT         192            //  PrintCenterText()
 #define MAX_INT                 2147483647     //  
-#define MIN_INT                 -2147483648    //  
+#define MIN_INT                 -2147483648    // 
+//#define TF_MAX_PLAYERS          34             //   
 
 static s_iLastPriority[MAXPLAYERS+1] = {MIN_INT,...};
-static Handle:s_hPCTTimer[MAXPLAYERS+1] = {INVALID_HANDLE,...};
+static Float:s_flResetPriority[MAXPLAYERS+1] = {0.0,...};
 
 /*
     An example of how to use this:
@@ -43,14 +44,19 @@ stock PriorityCenterText(iClient, iPriority = MIN_INT, const String:szFormat[], 
 
     if (s_iLastPriority[iClient] > iPriority)
     {
-        return;
+        if (GetEngineTime() >= s_flResetPriority[iClient])
+        {
+            s_iLastPriority[iClient] = MIN_INT;
+        }
+        else
+        {
+            return;
+        }
     }
 
     if (iPriority > s_iLastPriority[iClient])
     {
-        ClearTimer(s_hPCTTimer[iClient]);
-        s_hPCTTimer[iClient] = CreateTimer(5.0, RevertPriorityCenterText, iClient);
-
+        s_flResetPriority[iClient] = GetEngineTime() + 5.0;
         s_iLastPriority[iClient] = iPriority;
     }
 
@@ -100,17 +106,28 @@ stock PriorityCenterTextAllEx(iPriority = MIN_INT+1, const String:szFormat[], an
     
     if (s_iLastPriority[0] > iPriority)
     {
-        return;
+        if (GetEngineTime() >= s_flResetPriority[0])
+        {
+            s_iLastPriority[0] = MIN_INT;
+
+            for (new i = 1; i <= MaxClients; i++)
+            {
+                s_iLastPriority[i] = MIN_INT;
+            }
+        }
+        else
+        {
+            return;
+        }
     }
 
     if (iPriority > s_iLastPriority[0])
     {
-        ClearTimer(s_hPCTTimer[0]);
-        s_hPCTTimer[0] = CreateTimer(5.0, RevertPriorityCenterText, -1);
+        s_flResetPriority[0] = GetEngineTime() + 5.0;
 
         s_iLastPriority[0] = iPriority;
 
-        for (new i = 1; i <= MaxClients; i++) // Our loop includes [0] (console)
+        for (new i = 1; i <= MaxClients; i++)
         {
             s_iLastPriority[i] = MAX_INT;
         }
@@ -126,22 +143,5 @@ stock PriorityCenterTextAllEx(iPriority = MIN_INT+1, const String:szFormat[], an
             VFormat(szBuffer, sizeof(szBuffer), szFormat, 3);
             PrintCenterText(i, "%s", szBuffer);
         }
-    }
-}
-
-public Action:RevertPriorityCenterText(Handle:hTimer, any:Client)
-{
-    if (Client == -1) // "All"
-    {
-        for (new i = 0; i <= MaxClients; i++)
-        {
-            s_iLastPriority[i] = MIN_INT;
-        }
-        s_hPCTTimer[0] = INVALID_HANDLE;
-    }
-    else
-    {
-        s_iLastPriority[Client] = MIN_INT;
-        s_hPCTTimer[Client] = INVALID_HANDLE;
     }
 }
